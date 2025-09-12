@@ -1,0 +1,48 @@
+# ------------------------
+# Node.js
+# ------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ------------------------
+# Build / output
+# ------------------------
+.next/
+dist/
+out/
+coverage/
+
+# ------------------------
+# Env files
+# ------------------------
+.env
+.env.local
+.env.*.local
+
+# ------------------------
+# Prisma (backend DB)
+# ------------------------
+backend/prisma/dev.db
+backend/prisma/migrations/
+
+# ------------------------
+# Python / ML (if used later)
+# ------------------------
+ml-service/__pycache__/
+ml-service/*.pyc
+ml-service/env/
+
+# ------------------------
+# OS files
+# ------------------------
+.DS_Store
+Thumbs.db
+
+# ------------------------
+# Logs
+# ------------------------
+logs/
+*.log
