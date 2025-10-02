@@ -1,12 +1,14 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "commonjs",
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "strict": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true
+    "target": "ES2020",                // Modern JS target
+    "module": "commonjs",              // Node.js modules
+    "outDir": "./dist",                // Compiled output
+    "rootDir": ".",                     // Root is project root
+    "strict": true,                     // Enable strict type checking
+    "esModuleInterop": true,           // Allow default imports from CommonJS
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true                // Skip type check on node_modules
   },
-  "include": ["src"]
+  "include": ["prisma/**/*.ts", "server.ts", "routes/**/*.ts", "services/**/*.ts", "utils/**/*.ts", "middleware/**/*.ts", "seed.ts"],
+  "exclude": ["dist", "node_modules"]
 }

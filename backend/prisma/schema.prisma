@@ -1,15 +1,107 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
+}
+
+// ---------------- ENUMS ----------------
+enum Role {
+  USER
+  ADMIN
+  COACH
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum WorkoutType {
+  CROSS_TRAINING
+  FUNCTIONAL_TRAINING
+  PILATES
+  AEROBIC
+  YOGA
+  WEIGHT_LIFTING
+  RUNNING
+  DANCE
+  SWIMMING
+  CALISTHENICS
+}
+
+enum GoalType {
+  LOSE
+  GAIN
+  MAINTAIN
+  BODYFAT
+  MUSCLE
+  ENDURANCE
+  STRENGTH
+  FLEXIBILITY
+}
+
+// ---------------- MODELS ----------------
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  // Relations
+  metrics     Metric?
+  preferences Preference?
+  goals       Goal[]
+  dietPlans   DietPlan[]
+}
+
+model Metric {
+  id        String   @id @default(uuid())
+  weight    Float
+  height    Float
+  age       Int
+  gender    Gender
+  bodyFat   Float?
+
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique // 1:1 relation with User for now
+}
+
+model Preference {
+  id         String   @id @default(uuid())
+  dietType   String
+  allergies  Json   // array of strings
+  dislikes   Json   // array of strings
+  workoutStyle Json
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique // 1:1 relation with User
+}
+
+model Goal {
+  id           String   @id @default(uuid())
+  goalType     GoalType
+  targetWeight Float
+  weeklyChange Float?   // optional weekly change (kg per week)
+  createdAt    DateTime @default(now())
+
+  user   User @relation(fields: [userId], references: [id])
+  userId String
+}
+
+model DietPlan {
+  id        String   @id @default(uuid())
+  diet      Json    //  array of objects
+  createdAt DateTime @default(now())
+
+  user   User @relation(fields: [userId], references: [id])
+  userId String
 }
