@@ -8,7 +8,7 @@ import { storeObject } from "../utils/localStorage";
 export function useUserDetails(userId?: string) {
   const queryClient = useQueryClient();
 
-  // --- Fetch user ---
+  // Fetch user
   const userQuery = useQuery({
     queryKey: ["fullUser", userId],
     queryFn: async () => {
@@ -19,7 +19,7 @@ export function useUserDetails(userId?: string) {
     enabled: !!userId,
   });
 
-  // --- Update user ---
+  // Update user
   const updateUser = useMutation({
     mutationFn: async (updatedData: Partial<IUser>) => {
       const res = await axios.put(`/api/user/${userId}`, { ...updatedData });
@@ -42,7 +42,7 @@ export function useUserDetails(userId?: string) {
     },
   });
 
-  // --- Add Metric to user ---
+  // Add Metric to user
   const addMetricToUser = useMutation({
     mutationFn: async (metricData: Partial<IMetrics>) => {
       if (!userId) throw new Error("User ID is required");
@@ -53,10 +53,21 @@ export function useUserDetails(userId?: string) {
       queryClient.invalidateQueries({ queryKey: ["fullUser", userId] });
     },
   });
-
+// Generate AI Plans
+  const generateAiPlans = useMutation({
+    mutationFn: async () => {
+      if (!userId) throw new Error("User ID is required for AI plan generation");
+      const res = await axios.post("/api/ai", { id: userId });
+      return res.data.data; 
+    },
+    onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ["fullUser", userId] });
+  },
+  });
   return {
     ...userQuery,
     updateUser,
-    addMetricToUser
+    addMetricToUser,
+    generateAiPlans
   };
 }

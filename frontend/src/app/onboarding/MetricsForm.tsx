@@ -50,6 +50,7 @@ console.log(constantMetrics)
               birthDate: newValue ? newValue.toISOString() : null,
             })
           }
+          format="DD/MM/YYYY"
           slotProps={{
             textField: {
               fullWidth: true,

@@ -17,7 +17,7 @@ function getFirstIncompleteStep(user: any): number | null {
 
 export default function LandingPage() {
   const { user } = useAuth();
-  const { data: fullUser, isLoading } = useUserDetails(user?.id);
+  const { data: fullUser } = useUserDetails(user?.id);
   const [authOpen, setAuthOpen] = useState(false);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [initialStep, setInitialStep] = useState(0);

@@ -234,7 +234,7 @@ export default function OnboardingModal({
 
       {/* ❌ API error snackbar */}
       <MySnackBar
-        open={!!apiErrorMessage}
+        open={!updateUser.isIdle && updateUser.isError}
         onClose={() => {
           updateUser.reset();
         }}
@@ -244,7 +244,7 @@ export default function OnboardingModal({
 
       {/* ✅ Success snackbar */}
       <MySnackBar
-        open={updateUser.isSuccess}
+        open={!updateUser.isIdle && updateUser.isSuccess}
         onClose={() => {
           updateUser.reset();
         }}

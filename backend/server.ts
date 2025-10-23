@@ -2,6 +2,7 @@ import express from "express";
 import userRoutes from "./routes/userRoutes";
 import dotenv from "dotenv"
 import { errorHandler } from "./middleware/errorHandler";
+import aiRoutes from "./routes/aiRoutes";
 
 dotenv.config();  // Load environment variables from .env file
 
@@ -13,6 +14,10 @@ app.use(express.json());
 
 // Use routes
 app.use('/api/user', userRoutes);
+// Ai routes
+app.use("/api/ai", aiRoutes);
+
+
 
 // 404 fallback
 app.use((req, res) => {

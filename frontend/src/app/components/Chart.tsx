@@ -96,18 +96,18 @@ export default function Chart({
             value: Number(d.value.toFixed(2)),
             itemStyle: { color: gradientColors[idx % gradientColors.length] },
           })),
-        label: { formatter: "{b}: {c}" },
+        label: { formatter: "{b}: {c}gr" },
         emphasis: { scale: true },
       },
     ];
   }
 
   const option = {
-    title: {
-      text: title,
-      left: "center",
-      textStyle: { color: "#000" },
-    },
+    // title: {
+    //   text: title,
+    //   left: "center",
+    //   textStyle: { fontWeight: "bold", color: "#be95be" },
+    // },
     tooltip: {
       trigger: type === "pie" ? "item" : "axis",
       formatter: type === "pie" ? "{b}: {c}" : undefined,
@@ -137,7 +137,7 @@ export default function Chart({
         <Typography
           variant="h6"
           gutterBottom
-          sx={{ fontWeight: "bold", color: "#be95be" }}
+          sx={{ fontWeight: "bold", color: "#be95be", textAlign: "center" }}
         >
           {title}
         </Typography>

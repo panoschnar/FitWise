@@ -81,7 +81,7 @@ export function calculateDailyCalories(
       burned.push(0);
     } else {
       const dailyBurn = dayPlan.exercises.reduce((sum, ex) => {
-        const rate = burnRates[ex.type.toUpperCase()] ?? 6; 
+        const rate = burnRates[ex.type?.toUpperCase()] ?? 6; 
         const duration = ex.durationMin ?? (ex.sets && ex.reps ? ex.sets * ex.reps * 0.5 : 30);
         return sum + rate * duration;
       }, 0);

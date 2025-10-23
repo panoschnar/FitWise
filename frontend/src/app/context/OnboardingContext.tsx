@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, use } from "react";
 import { IMetrics, IPreferences, IGoals, IUser } from "../utils/interfaces";
 
 interface OnboardingContextProps {
@@ -19,11 +19,7 @@ const OnboardingContext = createContext<OnboardingContextProps | undefined>(
 
 interface ProviderProps {
   children: ReactNode;
-  userData: {
-    metrics?: IMetrics[];
-    preferences?: IPreferences;
-    goals?: IGoals;
-  };
+  userData: IUser;
 }
 
 export function OnboardingProvider({ children, userData }: ProviderProps) {
@@ -52,9 +48,9 @@ export function OnboardingProvider({ children, userData }: ProviderProps) {
     userData?.goals ?? { goalType: "", targetWeight: null, weeklyChange: null }
   );
   const [constantMetrics, setConstantMetrics] = useState<Partial<IUser>>({
-    height: null,
-    birthDate: null,
-    gender: "" as "MALE" | "FEMALE" | "OTHER" | "",
+    height: userData.height ?? null,
+    birthDate: userData.birthDate ?? null,
+    gender: userData.gender ?? ""
   });
   const reset = () => {
     setMetrics(lastMetric);

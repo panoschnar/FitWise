@@ -11,10 +11,6 @@ import {
   Button,
   Typography,
   CircularProgress,
-  Alert,
-  Snackbar,
-  Slide,
-  SlideProps,
   InputAdornment,
   IconButton,
   FormControl,
@@ -35,9 +31,7 @@ interface AuthModalProps {
   onClose: () => void;
   onSuccess: () => void;
 }
-function SlideTransition(props: SlideProps) {
-  return <Slide {...props} direction="up" />;
-}
+
 type FormData = {
   name: string;
   email: string;
@@ -125,7 +119,7 @@ export default function AuthModal({
         tab === 0 ? loginMutation.error : registerMutation.error
       )
     : "";
-
+console.log(apiErrorMessage)
   return (
     <>
       <Modal

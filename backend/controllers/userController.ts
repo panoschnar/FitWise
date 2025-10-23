@@ -16,7 +16,6 @@ export const getUsers = asyncHandler(async (_req: Request, res: Response) => {
 // Get user by ID
 export const getUser = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
-
   const user = await prisma.user.findUnique({
     where: { id },
     include: {
@@ -159,7 +158,7 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
 export const addMetric = asyncHandler(async (req: Request, res: Response) => {
   const { userId } = req.params; // Pass userId in the route
   const { weight, bodyFat } = req.body;
-  console.log("mpike", weight, bodyFat);
+
   if (!weight) throw new AppError("Weight is required", 400);
 
   // Check if user exists

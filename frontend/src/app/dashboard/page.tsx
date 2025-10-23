@@ -31,6 +31,7 @@ import Loader from "../components/Loader";
 import WeeklyExerciseTable from "../components/WeeklyExerciseTable";
 import SettingsAccessibilityIcon from "@mui/icons-material/SettingsAccessibility";
 import AiButton from "./AiButton";
+import UserMetrics from "./UserMetrics";
 function ErrorScreen() {
   return (
     <Box
@@ -54,8 +55,11 @@ export default function Dashboard() {
   const [loggingOut, setLoggingOut] = useState(false);
   const router = useRouter();
   const [openMetricDialog, setOpenMetricDialog] = useState(false);
+  // Loader state for AI plan generation
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiProgress, setAiProgress] = useState<number>(0);
 
-  // ✅ Handle logout first
+  // Handle logout first
   const handleLogout = () => {
     setLoggingOut(true);
 
@@ -85,38 +89,34 @@ export default function Dashboard() {
   if (isError) {
     return <ErrorScreen />;
   }
-  // Get last metrics entry (latest)
-  const userMetric = fullUser.metrics?.[fullUser.metrics.length - 1] ?? {
-    weight: 0,
-    height: 0,
-    bodyFat: null,
-  };
 
-  // Generate labels from metric creation dates
-  const metricLabels =
-    fullUser.metrics?.map((m) =>
-      new Date(m.createdAt).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-      })
-    ) ?? [];
+  console.log(fullUser);
 
   const nutrition = fullUser?.myPlans?.[0]?.nutritionSummary ?? [];
-  const weightData: number[] =
-    fullUser.metrics?.map((m) => m.weight ?? 0) ?? [];
 
-  const bodyFatData: number[] =
-    fullUser.metrics?.map((m) => m.bodyFat ?? 0).filter((v) => v !== null) ??
-    [];
-  const exercisePlan = fullUser?.myPlans?.[0]?.exercisePlan ?? [];
-  const {
-    labels: combinedLabels,
-    intake: intakeAligned,
-    burned: burnedAligned,
-  } = calculateDailyCalories(nutrition, exercisePlan);
   return (
     <>
       <TopBar onLogout={handleLogout} />
+      {/* Full-dashboard Loader */}
+      {aiLoading && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(255,255,255,0.8)",
+            zIndex: 999,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Loader message={`${aiProgress}%`}/>
+        </Box>
+      )}
       <Box
         sx={{
           maxWidth: "100%",
@@ -155,296 +155,33 @@ export default function Dashboard() {
             Add Metrics
           </Button>
         </Box>
+
         {/* User Info Cards */}
-        <Grid container spacing={3} mb={4}>
-          {/* Weight Card*/}
-          <Grid
-            container
-            spacing={3}
-            mb={4}
-            component="div"
-            size={{ xs: 12, sm: 6, md: "grow" }}
-          >
-            <Card
-              sx={{
-                background: "#be95be",
-                color: "#fff",
-                textAlign: "center",
-                width: "100%",
-                minWidth: 100,
-                "&:hover": {
-                  boxShadow: "5px 5px 15px -5px rgba(0,0,0,0.45);",
-                },
-              }}
-            >
-              <CardContent>
-                <FitnessCenterIcon sx={{ fontSize: 40 }} />
-                <Typography variant="h6" mt={1}>
-                  Weight
-                </Typography>
-                <Typography variant="h5" fontWeight="bold">
-                  {userMetric.weight} kg
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+        <UserMetrics {...fullUser} />
 
-          {/* Height Card*/}
-          <Grid
-            container
-            spacing={3}
-            mb={4}
-            component="div"
-            size={{ xs: 12, sm: 6, md: "grow" }}
-          >
-            <Card
-              sx={{
-                background: "#be95be",
-                color: "#fff",
-                textAlign: "center",
-                width: "100%",
-                minWidth: 100,
-
-                "&:hover": {
-                  boxShadow: "5px 5px 15px -5px rgba(0,0,0,0.45);",
-                },
-              }}
-            >
-              <CardContent>
-                <HeightIcon sx={{ fontSize: 40 }} />
-                <Typography variant="h6" mt={1}>
-                  Height
-                </Typography>
-                <Typography variant="h5" fontWeight="bold">
-                  {fullUser.height ?? "-"} cm
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Body Fat Card*/}
-          {userMetric.bodyFat && (
-            <Grid
-              container
-              spacing={3}
-              mb={4}
-              component="div"
-              size={{ xs: 12, sm: 6, md: "grow" }}
-            >
-              <Card
-                sx={{
-                  background: "#be95be",
-                  color: "#fff",
-                  textAlign: "center",
-                  width: "100%",
-                  minWidth: 100,
-
-                  "&:hover": {
-                    boxShadow: "5px 5px 15px -5px rgba(0,0,0,0.45);",
-                  },
-                }}
-              >
-                <CardContent>
-                  <PercentIcon sx={{ fontSize: 40 }} />
-                  <Typography variant="h6" mt={1}>
-                    Body Fat
-                  </Typography>
-                  <Typography variant="h5" fontWeight="bold">
-                    {userMetric?.bodyFat ?? "-"} %
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          )}
-
-          {/* Goal Card*/}
-          <Grid
-            container
-            spacing={3}
-            mb={4}
-            component="div"
-            size={{ xs: 12, sm: 6, md: "grow" }}
-          >
-            <Card
-              sx={{
-                background: "linear-gradient(135deg, #be95be, #aaefda)",
-                color: "#fff",
-                textAlign: "center",
-                width: "100%",
-                minWidth: 100,
-                "&:hover": {
-                  boxShadow: "5px 5px 15px -5px rgba(0,0,0,0.45);",
-                },
-              }}
-            >
-              <CardContent>
-                <SettingsAccessibilityIcon sx={{ fontSize: 40 }} />
-                <Typography variant="h6" mt={1}>
-                  BMI
-                </Typography>
-                {userMetric?.weight && fullUser.height ? (
-                  (() => {
-                    const bmi = calculateBMI(
-                      userMetric.weight,
-                      fullUser.height
-                    );
-                    if (!bmi) return <Typography>-</Typography>;
-                    const category = getBMICategoryInfo(bmi);
-                    return (
-                      <>
-                        <Typography variant="h5" fontWeight="bold">
-                          {bmi.toFixed(1)}
-                        </Typography>
-                        <Chip
-                          label={category.label}
-                          sx={{
-                            mt: 1,
-                            background: `${category.color}`,
-                            color: `${
-                              category.label === "Overweight" ||
-                              (category.label === "Obese" && "#fff")
-                            }`,
-                          }}
-                        />
-                      </>
-                    );
-                  })()
-                ) : (
-                  <Typography>-</Typography>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-        <Grid container spacing={4} sx={{ mt: 2 }}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            {/* Weight Progress Chart */}
-            <Chart
-              title="Weight Progress"
-              data={weightData}
-              type="line"
-              labels={metricLabels}
-              yAxisName="Weight (kg)"
-              lineColor="#be95be"
-              areaGradient={["#aaefda", "#d1c6ff"]}
-            />
-          </Grid>
-
-          {/* Body Fat  Chart (show only if data exists)  */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            {bodyFatData.length > 0 && (
-              <Chart
-                title="Body Fat Progress"
-                type="line"
-                data={bodyFatData}
-                labels={metricLabels}
-                yAxisName="Body Fat (%)"
-                lineColor="#3ab8ab"
-                areaGradient={["#d1c6ff", "#aaefda"]}
-              />
-            )}
-          </Grid>
-        </Grid>
-
-        {/* Diet Table */}
+        {/* Diet Plan */}
         {fullUser?.myPlans?.length ? (
           <WeeklyDietTable
             diet={fullUser.myPlans[fullUser.myPlans.length - 1].dietPlan}
+            nutrition={nutrition}
           />
         ) : null}
 
-        <Grid container spacing={4} sx={{ mt: 2 }}>
-          {/* 1️⃣ Pie Chart — Macros Breakdown (avg weekly) */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Chart
-              type="pie"
-              title="Average Weekly Macros"
-              data={[
-                {
-                  name: "Protein",
-                  value: nutrition.reduce((a, b) => a + b.protein, 0) / 7,
-                },
-                {
-                  name: "Carbs",
-                  value: nutrition.reduce((a, b) => a + b.carbs, 0) / 7,
-                },
-                {
-                  name: "Fats",
-                  value: nutrition.reduce((a, b) => a + b.fats, 0) / 7,
-                },
-              ]}
-              gradientColors={["#be95be", "#aaefda", "#d1c6ff"]}
-            />
-          </Grid>
-          {/* 2️⃣ Bar Chart — Daily Calories */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Chart
-              type="bar"
-              title="Daily Calories"
-              labels={nutrition.map((d) => d.day)}
-              data={nutrition.map((d) => d.calories)}
-              yAxisName="kcal"
-              // lineColor="#be95be"
-              gradientColors={["#be95be", "#aaefda"]}
-            />
-          </Grid>
-        </Grid>
-
-        {/* Exercise Table */}
+        {/* Exercise Plan */}
         {fullUser?.myPlans?.length ? (
           <WeeklyExerciseTable
             exercisePlan={fullUser.myPlans[0].exercisePlan}
+            nutrition={nutrition}
           />
         ) : null}
-
-        {/* Calories Burned Bar Chart */}
-        <Chart
-          type="bar"
-          title="Calories Intake vs Burned"
-          labels={combinedLabels}
-          data={[
-            {
-              name: "Intake",
-              type: "bar",
-              data: intakeAligned,
-              itemStyle: {
-                color: {
-                  type: "linear",
-                  x: 0,
-                  y: 0,
-                  x2: 0,
-                  y2: 1,
-                  colorStops: [
-                    { offset: 0, color: "#be95be" },
-                    { offset: 1, color: "#aaefda" },
-                  ],
-                },
-                barBorderRadius: [6, 6, 0, 0], // rounded top corners
-              },
-            },
-            {
-              name: "Burned",
-              type: "bar",
-              data: burnedAligned,
-              itemStyle: {
-                color: {
-                  type: "linear",
-                  x: 0,
-                  y: 0,
-                  x2: 0,
-                  y2: 1,
-                  colorStops: [
-                    { offset: 0, color: "#aaefda" },
-                    { offset: 1, color: "#63ad96" },
-                  ],
-                },
-                barBorderRadius: [6, 6, 0, 0],
-              },
-            },
-          ]}
-        />
       </Box>
-      {!fullUser?.myPlans?.length && <AiButton />}
+      {!fullUser?.myPlans?.length && (
+        <AiButton
+          userId={fullUser.id}
+          setLoading={setAiLoading}
+          setProgress={setAiProgress}
+        />
+      )}
 
       <AddMetricModal
         open={openMetricDialog}
