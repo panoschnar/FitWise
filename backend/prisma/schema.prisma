@@ -46,62 +46,64 @@ enum GoalType {
 
 // ---------------- MODELS ----------------
 model User {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   name      String
-  email     String   @unique
+  email     String    @unique
   password  String
-  role      Role     @default(USER)
+  role      Role      @default(USER)
+  gender    Gender?
+  height    Float?
+  birthDate DateTime?
+
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
 
   // Relations
-  metrics     Metric?
+  metrics     Metric[]
   preferences Preference?
-  goals       Goal[]
-  dietPlans   DietPlan[]
+  goals       Goal?
+  myPlans     MyPlan[]
+}
+
+model MyPlan {
+  id               String   @id @default(uuid())
+  dietPlan         Json // stores DietPlan[]
+  exercisePlan     Json // stores ExercisePlan[]
+  nutritionSummary Json // stores DailySummary[]
+  createdAt        DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
 }
 
 model Metric {
   id        String   @id @default(uuid())
   weight    Float
-  height    Float
-  age       Int
-  gender    Gender
   bodyFat   Float?
-
   createdAt DateTime @default(now())
 
   user   User   @relation(fields: [userId], references: [id])
-  userId String @unique // 1:1 relation with User for now
+  userId String
 }
 
 model Preference {
-  id         String   @id @default(uuid())
-  dietType   String
-  allergies  Json   // array of strings
-  dislikes   Json   // array of strings
+  id           String @id @default(uuid())
+  dietType     String
+  allergies    Json // array of strings
+  dislikes     Json // array of strings
   workoutStyle Json
 
   user   User   @relation(fields: [userId], references: [id])
-  userId String @unique // 1:1 relation with User
+  userId String @unique
 }
 
 model Goal {
   id           String   @id @default(uuid())
   goalType     GoalType
   targetWeight Float
-  weeklyChange Float?   // optional weekly change (kg per week)
+  weeklyChange Float?
   createdAt    DateTime @default(now())
 
-  user   User @relation(fields: [userId], references: [id])
-  userId String
-}
-
-model DietPlan {
-  id        String   @id @default(uuid())
-  diet      Json    //  array of objects
-  createdAt DateTime @default(now())
-
-  user   User @relation(fields: [userId], references: [id])
-  userId String
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
 }

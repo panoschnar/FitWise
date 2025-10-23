@@ -12,7 +12,7 @@ const port = process.env.PORT || 5000;
 app.use(express.json());
 
 // Use routes
-app.use('/api/users', userRoutes);
+app.use('/api/user', userRoutes);
 
 // 404 fallback
 app.use((req, res) => {
